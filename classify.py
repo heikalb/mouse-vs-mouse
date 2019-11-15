@@ -9,36 +9,63 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 
 
+def get_data():
+    data = []
+
+    for label in ['animal', 'computer']:
+        with open(f'datasets/{label}.csv', 'r') as f:
+            reader = csv.reader(f)
+            data += [(r[0], label) for r in reader if r][1:]
+
+    random.shuffle(data)
+    texts = [d[0] for d in data]
+    labels = [d[1] for d in data]
+
+    return texts, labels
+
+
+def get_vectors(texts):
+    vectorizer = CountVectorizer()
+    count_vectors = vectorizer.fit_transform(texts)
+    transformer = TfidfTransformer()
+
+    return transformer.fit_transform(count_vectors)
+
+
+def run_test(classifier, tfidf, labels):
+    pred = classifier.predict(tfidf)
+
+    num_correct = 0
+    for i in range(len(pred)):
+        print(f'Actual: {pred[i]}\tPrediction: {labels[i]}')
+
+        if pred[i] == labels[i]:
+            num_correct += 1
+
+    proportion = f'{num_correct}/{len(pred)}'
+    percentage = round((num_correct/len(pred))*100, 2)
+    print(f'Accuracy: {proportion}, {percentage}%')
+
+
 def main():
     """
     """
     # Get data
-    with open('datasets/animal.csv', 'r') as f:
-        reader = csv.reader(f)
-        animal_data = [(r[0], 'animal') for r in reader if r][1:]
+    texts, labels = get_data()
 
-    with open('datasets/computer.csv', 'r') as f:
-        reader = csv.reader(f)
-        computer_data = [(r[0], 'computer') for r in reader if r][1:]
+    # Turn texts into vectors
+    tfidf = get_vectors(texts)
 
-    data = animal_data + computer_data
-    random.shuffle(data)
-    train_data = data[:-1000]
-
-    # Get features
-    vectorizer = CountVectorizer()
-    count_vectors = vectorizer.fit_transform([d[0] for d in train_data])
-    transformer = TfidfTransformer()
-    tfidf = transformer.fit_transform(count_vectors)
+    # Separate training and testing data
+    split = int(len(texts)*0.8)
+    train_tfidf, test_tfidf = tfidf[:split], tfidf[split:]
+    train_labels, test_labels = labels[:split], labels[split:]
 
     # Train Naive Bayes classifier
-    classifier = MultinomialNB().fit()
-    pred = classifier.predict()
+    classifier = MultinomialNB().fit(train_tfidf, train_labels)
 
-    for p in pred:
-        print(p)
-
-    return
+    # Test classifier
+    run_test(classifier, test_tfidf, test_labels)
 
 
 if __name__ == '__main__':
