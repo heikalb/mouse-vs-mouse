@@ -12,8 +12,8 @@ from sklearn.naive_bayes import MultinomialNB
 
 def get_data():
     """
-    Get text data from .csv files. Associate each text with a label ('animal'
-    vs. 'computer')
+    Get mouse text data from .csv files. Associate each text with a label
+    ('animal' vs. 'computer')
     :return: list of texts, list of labels
     """
     data = []
