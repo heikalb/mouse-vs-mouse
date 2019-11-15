@@ -9,4 +9,5 @@ All of this and the testing of the classifier are implemented in classify.py.
 The text data are stored in `datasets/`
 
 Requirement(s): sklearn
+
 Data source: https://www.kaggle.com/werty12121/animal-mouse-vs-computer-mouse-text-dataset#animal.csv
